@@ -8732,6 +8732,45 @@ inline std::string key_value(const Tile &t){
   if(t.unit=="%")return screen_text::percent((int)std::lround(number));
   return text;
 }
+// Kept out of render_slot: the ESP32-S3's Xtensa linker cannot reach the literal
+// pool when render_slot grows too large. Never inline this optional layout.
+__attribute__((noinline)) inline void render_accessible_lamp(
+    Widgets &w, const Tile &t, const std::string &value,
+    const std::string &value_short, const std::string &value_tail,
+    int content_w, int content_h) {
+  lv_obj_add_flag(w.slider,LV_OBJ_FLAG_HIDDEN);hide_panel(w);hide_extra(w);
+  lv_obj_add_flag(w.unit,LV_OBJ_FLAG_HIDDEN);
+  const int gap=ui::px(3), available_h=std::max(1,content_h);
+  const lv_font_t *title_face=name_font(w,content_w);
+  const lv_font_t *state_face=control_font?control_font:w.value_font;
+  if(text_width(value,state_face)>content_w)state_face=w.value_font;
+  const int name_h=lv_font_get_line_height(title_face);
+  const int state_h=lv_font_get_line_height(state_face);
+  const int circle_limit=available_h-name_h-state_h-2*gap;
+  const int icon_need=lv_font_get_line_height(w.icon_font);
+  const int circle=std::max(1,std::min({w.base_circle,content_w,circle_limit}));
+  if(circle_limit>=icon_need && circle>=icon_need){
+    set_font(w.title,title_face);set_font(w.value,state_face);
+    set_text_align(w.title,LV_TEXT_ALIGN_CENTER);set_text_align(w.value,LV_TEXT_ALIGN_CENTER);
+    lv_obj_set_size(w.title,content_w,name_h);lv_obj_set_size(w.value,content_w,state_h);
+    const int top=std::max(0,(available_h-circle-name_h-state_h-2*gap)/2);
+    lv_obj_set_size(w.circle,circle,circle);lv_obj_set_pos(w.circle,(content_w-circle)/2,top);
+    set_font(w.icon,w.icon_font);center_icon(w.icon);
+    tile_picture_place(w,t,circle,(content_w-circle)/2,top);
+    lv_obj_set_pos(w.title,0,top+circle+gap);
+    lv_obj_set_pos(w.value,0,top+circle+gap+name_h+gap);
+    fit_value(w.value,value,value_short,value_tail,content_w);
+  }else{
+    // Keep the icon from being clipped on a very short grid.
+    set_font(w.title,w.title_font);set_font(w.value,w.value_font);
+    const int ch=std::min(w.base_circle,available_h);
+    lv_obj_set_size(w.circle,ch,ch);lv_obj_set_pos(w.circle,0,0);
+    set_text_align(w.title,LV_TEXT_ALIGN_LEFT);set_text_align(w.value,LV_TEXT_ALIGN_LEFT);
+    lv_obj_set_pos(w.title,ch+gap,0);lv_obj_set_pos(w.value,ch+gap,name_h);
+    lv_obj_set_width(w.title,std::max(1,content_w-ch-gap));
+    lv_obj_set_width(w.value,std::max(1,content_w-ch-gap));
+  }
+}
 inline void render_slot(size_t slot) {
   swipe_profile::SlotTimer slot_timer(slot);
   swipe_profile::Lap lap;
@@ -8958,41 +8997,7 @@ inline void render_slot(size_t slot) {
      render_tall(w,t,with_panel,content_w,content_h)){
     lap(swipe_profile::GEOMETRY);
   }else if(SD_ACCESSIBLE_LIGHTS && d=="light" && !w.full && !watch && !mini && !with_panel && !graph){
-    // Accessible lamp face on the 480x480 Guition: icon above two centred lines.
-    // Use fonts that actually fit the cell; the card still owns its normal tap action.
-    lv_obj_add_flag(w.slider,LV_OBJ_FLAG_HIDDEN);hide_panel(w);hide_extra(w);
-    lv_obj_add_flag(w.unit,LV_OBJ_FLAG_HIDDEN);
-    const int gap=ui::px(3);
-    const int available_h=std::max(1,content_h);
-    const lv_font_t *title_face=name_font(w,content_w);
-    const lv_font_t *state_face=control_font?control_font:w.value_font;
-    if(text_width(value,state_face)>content_w)state_face=w.value_font;
-    int name_h=lv_font_get_line_height(title_face);
-    int state_h=lv_font_get_line_height(state_face);
-    const int circle_limit=available_h-name_h-state_h-2*gap;
-    const int icon_need=lv_font_get_line_height(w.icon_font);
-    const int circle=std::max(1,std::min({w.base_circle,content_w,circle_limit}));
-    if(circle_limit>=icon_need && circle>=icon_need){
-      set_font(w.title,title_face);set_font(w.value,state_face);
-      set_text_align(w.title,LV_TEXT_ALIGN_CENTER);set_text_align(w.value,LV_TEXT_ALIGN_CENTER);
-      lv_obj_set_size(w.title,content_w,name_h);lv_obj_set_size(w.value,content_w,state_h);
-      const int top=std::max(0,(available_h-circle-name_h-state_h-2*gap)/2);
-      lv_obj_set_size(w.circle,circle,circle);lv_obj_set_pos(w.circle,(content_w-circle)/2,top);
-      set_font(w.icon,w.icon_font);center_icon(w.icon);
-      tile_picture_place(w,t,circle,(content_w-circle)/2,top);
-      lv_obj_set_pos(w.title,0,top+circle+gap);
-      lv_obj_set_pos(w.value,0,top+circle+gap+name_h+gap);
-      fit_value(w.value,value,value_short,value_tail,content_w);
-    }else{
-      // Extremely short grids keep the normal head rather than clipping text.
-      set_font(w.title,w.title_font);set_font(w.value,w.value_font);
-      const int ch=std::min(w.base_circle,available_h);
-      lv_obj_set_size(w.circle,ch,ch);lv_obj_set_pos(w.circle,0,0);
-      set_text_align(w.title,LV_TEXT_ALIGN_LEFT);set_text_align(w.value,LV_TEXT_ALIGN_LEFT);
-      lv_obj_set_pos(w.title,ch+gap,0);lv_obj_set_pos(w.value,ch+gap,name_h);
-      lv_obj_set_width(w.title,std::max(1,content_w-ch-gap));
-      lv_obj_set_width(w.value,std::max(1,content_w-ch-gap));
-    }
+    render_accessible_lamp(w,t,value,value_short,value_tail,content_w,content_h);
     lap(swipe_profile::GEOMETRY);
   }else if(w.full && !bedside){
     lap(swipe_profile::GEOMETRY);
