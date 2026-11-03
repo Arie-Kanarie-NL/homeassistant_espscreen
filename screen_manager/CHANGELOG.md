@@ -1,3 +1,7 @@
+## Unreleased (local customization, not published)
+
+- Test a turquoise 3-pixel border and vertically stacked icon, name and status on ordinary lamp tiles, leaving other tile types and the lamp background unchanged. Requires physical Guition verification.
+
 ## 0.4.96 (firmware 0.60.0)
 
 - **New screen says when the board on the cable is a screen Home Assistant already has.** Installing from this browser, the wizard reads the board's MAC address and asks Home Assistant, before anything is built: a board that is already a screen there (flashed before under another name) cannot be added as a new one, since Home Assistant keeps one ESPHome device per board, and until now the wizard waited for a screen that never came. It now names the screen Home Assistant has and offers to install that one again, or to replace it: after the firmware is on the board, the old screen leaves Home Assistant with its entities and the new one pairs by itself.
