@@ -24,6 +24,7 @@ enum Role : uint8_t {
   CARD,                 // tiles, cards, rows, the alert
   CARD_PRESSED,         // a settings row under a finger
   LINE,                 // the hairline around a card
+  LIGHT_BORDER_CUSTOM,  // locally configured high-contrast border for lamp tiles
   RAISED,               // a card above everything else: the alert
   RAISED_LINE,
   KEY,                  // round keys (back, close), a white key under a finger
@@ -142,6 +143,7 @@ inline constexpr Pair ROLES[ROLE_COUNT] = {
   /* CARD */                     {0xFFFFFF, 0x1A1A1A},
   /* CARD_PRESSED */             {0xF1F1F1, 0x2A2A2A},
   /* LINE */                     {0xDDDDDD, 0x292929},
+  /* LIGHT_BORDER_CUSTOM */      {0x30DFF2, 0x30DFF2},
   /* RAISED */                   {0xFFFFFF, 0x282828},
   /* RAISED_LINE */              {0xDDDDDD, 0x393939},
   /* KEY */                      {0xEEEEEE, 0x2A2A2A},
