@@ -14,3 +14,5 @@ Base: Tessera screens-v0.4.96 / firmware 0.60.0. The user's current Guition disp
 **Not yet compiled or tested on physical hardware. Do not flash this branch to a display yet.**
 
 Before installation: compile for Guition ESP32-S3-4848S040, audit short/tall/wide lamp tile layouts, confirm OTA compatibility and test on one display before updating the second. Do not commit any ESPHome Wi-Fi, OTA or API credentials to GitHub.
+
+GitHub Actions have been enabled for this fork; this documentation update requests a fresh CI run for the draft pull request.
