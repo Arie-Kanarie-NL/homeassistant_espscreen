@@ -23,6 +23,7 @@ packages:
 substitutions:
   # The key of this board file; the firmware reports it so ESP Screens knows what board a screen is.
   BOARD_ID: "guition"
+  ACCESSIBLE_LIGHT_TILES: "1"
   DEVICE_NAME: "guition-new"
   DEVICE_FRIENDLY_NAME: "My Guition"
 
