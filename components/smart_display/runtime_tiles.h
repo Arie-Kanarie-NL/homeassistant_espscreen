@@ -1,4 +1,7 @@
 #pragma once
+#ifndef SD_ACCESSIBLE_LIGHTS
+#define SD_ACCESSIBLE_LIGHTS 0
+#endif
 #include <cmath>
 #include <atomic>
 #include <cstring>
@@ -8954,7 +8957,7 @@ inline void render_slot(size_t slot) {
             (!w.full&&t.row_span()==1&&t.inline_control!="slider"&&(cover_row_card(t)||preset_cell(w,t))))&&!custom&&!watch&&!graph&&
      render_tall(w,t,with_panel,content_w,content_h)){
     lap(swipe_profile::GEOMETRY);
-  }else if(d=="light" && !w.full && !watch && !mini && !with_panel && !graph){
+  }else if(SD_ACCESSIBLE_LIGHTS && d=="light" && !w.full && !watch && !mini && !with_panel && !graph){
     // Accessible lamp face on the 480x480 Guition: icon above two centred lines.
     // Use fonts that actually fit the cell; the card still owns its normal tap action.
     lv_obj_add_flag(w.slider,LV_OBJ_FLAG_HIDDEN);hide_panel(w);hide_extra(w);
@@ -8967,8 +8970,9 @@ inline void render_slot(size_t slot) {
     int name_h=lv_font_get_line_height(title_face);
     int state_h=lv_font_get_line_height(state_face);
     const int circle_limit=available_h-name_h-state_h-2*gap;
+    const int icon_need=lv_font_get_line_height(w.icon_font);
     const int circle=std::max(1,std::min({w.base_circle,content_w,circle_limit}));
-    if(circle_limit>=ui::px(16)){
+    if(circle_limit>=icon_need && circle>=icon_need){
       set_font(w.title,title_face);set_font(w.value,state_face);
       set_text_align(w.title,LV_TEXT_ALIGN_CENTER);set_text_align(w.value,LV_TEXT_ALIGN_CENTER);
       lv_obj_set_size(w.title,content_w,name_h);lv_obj_set_size(w.value,content_w,state_h);
@@ -9200,8 +9204,8 @@ inline void render_slot(size_t slot) {
   const bool bare=t.transparent;
 #endif
   // A thin cyan frame identifies light tiles without changing their fill.
-  lv_obj_set_style_border_width(w.tile,d=="light"?ui::px(3):1,0);
-  if(d=="light")lv_obj_set_style_border_color(w.tile,theme::color(theme::LIGHT_BORDER_CUSTOM),0);
+  lv_obj_set_style_border_width(w.tile,SD_ACCESSIBLE_LIGHTS && d=="light"?ui::px(3):1,0);
+  if(SD_ACCESSIBLE_LIGHTS && d=="light")lv_obj_set_style_border_color(w.tile,theme::color(theme::LIGHT_BORDER_CUSTOM),0);
   else lv_obj_set_style_border_color(w.tile,theme::color(theme::LINE),0);
   const uint32_t paint=t.background|(bare?1u<<24:0);
   if (w.cached_active == palette_state && w.cached_paint == paint && !w.panel_dirty) { style_tall(w,t);ring_favorite(w,t);lap(swipe_profile::GEOMETRY); return; }
