@@ -9199,11 +9199,11 @@ inline void render_slot(size_t slot) {
 #else
   const bool bare=t.transparent;
 #endif
-  const uint32_t paint=t.background|(bare?1u<<24:0);
   // A thin cyan frame identifies light tiles without changing their fill.
   lv_obj_set_style_border_width(w.tile,d=="light"?ui::px(3):1,0);
-  if(d=="light")lv_obj_set_style_border_color(w.tile,lv_color_hex(0x30DFF2),0);
+  if(d=="light")lv_obj_set_style_border_color(w.tile,theme::color(theme::LIGHT_BORDER_CUSTOM),0);
   else lv_obj_set_style_border_color(w.tile,theme::color(theme::LINE),0);
+  const uint32_t paint=t.background|(bare?1u<<24:0);
   if (w.cached_active == palette_state && w.cached_paint == paint && !w.panel_dirty) { style_tall(w,t);ring_favorite(w,t);lap(swipe_profile::GEOMETRY); return; }
   w.cached_active = palette_state;w.cached_paint=paint;w.panel_dirty=false;
   // Home Assistant's colour for the state (tile_controls::accent), and a lamp's own colour while it is on.
